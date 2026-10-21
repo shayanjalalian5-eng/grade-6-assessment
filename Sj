@@ -1,0 +1,337 @@
+index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade 6 Assessment</title>
+<style>
+:root {
+  --blue: #2457d6;
+  --light: #f2f5fc;
+  --green: #17834b;
+  --red: #c43d42;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--light);
+  color: #17223b;
+}
+header {
+  background: var(--blue);
+  color: white;
+  padding: 24px 16px;
+  text-align: center;
+}
+header h1 { margin: 0 0 8px; }
+main {
+  max-width: 760px;
+  margin: 24px auto;
+  padding: 0 14px;
+}
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 15px #17223b12;
+}
+label { display: block; margin: 14px 0 7px; font-weight: bold; }
+select, input, button {
+  font: inherit;
+  padding: 12px;
+  border-radius: 9px;
+}
+select, input { width: 100%; border: 1px solid #ccd3e0; background: white; }
+button {
+  border: 0;
+  cursor: pointer;
+  background: var(--blue);
+  color: white;
+  font-weight: bold;
+}
+button:disabled { opacity: .5; cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.actions button { flex: 1; min-width: 120px; }
+.secondary { background: #e5eaf7; color: #17223b; }
+.question {
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e8ef;
+}
+.question p { font-weight: bold; line-height: 1.5; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 10px 0;
+  font-weight: normal;
+}
+.option input { width: auto; }
+#quiz, #results { display: none; }
+#timer { font-size: 1.1rem; font-weight: bold; color: var(--blue); }
+.feedback { margin-top: 12px; line-height: 1.7; }
+footer { text-align: center; padding: 24px; color: #68738a; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Grade 6 Assessment</h1>
+  <p>Practice, learn, and improve!</p>
+</header>
+
+<main>
+  <section class="card" id="welcome">
+    <h2>Welcome, Student!</h2>
+    <p>Select your name and choose an assessment to begin.</p>
+    <label for="student">Student name</label>
+    <select id="student">
+      <option value="">Choose your name</option>
+    </select>
+
+    <label for="subject">Assessment</label>
+    <select id="subject">
+      <option value="math">Math</option>
+      <option value="english">English</option>
+    </select>
+
+    <label for="minutes">Time limit</label>
+    <select id="minutes">
+      <option value="5">5 minutes</option>
+      <option value="10" selected>10 minutes</option>
+      <option value="15">15 minutes</option>
+      <option value="20">20 minutes</option>
+      <option value="0">No time limit</option>
+    </select>
+
+    <button id="start" style="width:100%;margin-top:18px">
+      Start Assessment
+    </button>
+    <p style="color:#68738a;font-size:.9rem">
+      Your score will appear when you finish.
+    </p>
+  </section>
+
+  <section class="card" id="quiz">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <strong id="quizTitle">Assessment</strong>
+      <span id="timer">10:00</span>
+    </div>
+    <p id="progress"></p>
+    <form id="questions"></form>
+    <div class="actions">
+      <button type="button" class="secondary" id="back">Back</button>
+      <button type="button" id="next">Next</button>
+      <button type="button" id="finish" style="display:none">Submit Answers</button>
+    </div>
+  </section>
+
+  <section class="card" id="results">
+    <h2>Assessment Results</h2>
+    <p id="score"></p>
+    <div id="review" class="feedback"></div>
+    <div class="actions">
+      <button id="again">Try Another Assessment</button>
+    </div>
+  </section>
+</main>
+
+<footer>Grade 6 Assessment · Keep learning!</footer>
+
+<script>
+const students = [
+  "Rin Ato",
+  "Arad Azin",
+  "Shayan Jalalian",
+  "Bensu Duran",
+  "Amirhossein Esmaeili",
+  "Mao Hashimoto",
+  "Chris Kim",
+  "Marcus Kwan",
+  "Leona Li",
+  "Ragaam Mehrab",
+  "Eugene Moon",
+  "Yunji Park",
+  "Kamyar Ramezani Farkhani",
+  "Theodore Scott",
+  "Emma Siminel",
+  "Alina Suh",
+  "Oscar Sun",
+  "Sophie Tamm-Tooming",
+  "William Xia",
+  "Kyle Xu",
+  "Phoebe Yang",
+  "Nina Yang",
+  "Jasie Yeung",
+  "Jordan Yeung",
+  "Jeremy Zhu"
+];
+
+const bank = {
+  math: [
+    {q:"What is 48 × 7?", a:["326","336","346","356"], c:1},
+    {q:"What is 144 ÷ 12?", a:["10","11","12","14"], c:2},
+    {q:"What is 3/4 of 20?", a:["5","10","15","16"], c:2},
+    {q:"What is 2.5 + 1.75?", a:["3.25","4.15","4.25","4.75"], c:2},
+    {q:"What number comes next: 4, 8, 12, 16, ...?", a:["18","20","22","24"], c:1},
+    {q:"What is the area of a rectangle 8 cm long and 5 cm wide?", a:["13 cm²","26 cm²","40 cm²","80 cm²"], c:2},
+    {q:"What is 25% of 80?", a:["10","15","20","25"], c:2},
+    {q:"Which fraction is equal to 1/2?", a:["2/3","3/6","4/6","5/8"], c:1},
+    {q:"What is 1,250 + 875?", a:["2,025","2,125","2,225","2,325"], c:2},
+    {q:"What is the perimeter of a square with sides of 6 cm?", a:["12 cm","18 cm","24 cm","36 cm"], c:2},
+    {q:"Solve: n + 17 = 42.", a:["15","25","35","59"], c:1},
+    {q:"Which is the largest number?", a:["0.65","0.605","0.56","0.6"], c:0}
+  ],
+  english: [
+    {q:"Choose the correct sentence.", a:["She go to school.","She goes to school.","She going school.","She gone to school."], c:1},
+    {q:"What is a synonym for 'happy'?", a:["Joyful","Angry","Tired","Worried"], c:0},
+    {q:"Choose the correct plural of 'child'.", a:["Childs","Childes","Children","Childrens"], c:2},
+    {q:"Which word is an adjective?", a:["Quickly","Beautiful","Running","Table"], c:1},
+    {q:"Choose the correct past tense: 'Yesterday, I ___ soccer.'", a:["play","plays","played","playing"], c:2},
+    {q:"Which word is a noun?", a:["Carefully","Jump","Teacher","Blue"], c:2},
+    {q:"Choose the correct punctuation.", a:["Where are you going.","Where are you going?","Where are you going,","Where are you going!?"], c:1},
+    {q:"What is the opposite of 'ancient'?", a:["Old","Historic","Modern","Past"], c:2},
+    {q:"Complete: 'They ___ finished their homework.'", a:["has","have","is","was"], c:1},
+    {q:"Which word is spelled correctly?", a:["Becaus","Because","Beacuse","Becose"], c:1},
+    {q:"In 'The bright sun warmed the park,' which word is the adjective?", a:["sun","warmed","bright","park"], c:2},
+    {q:"Choose the correct pronoun: 'Maria and ___ went home.'", a:["me","I","my","mine"], c:1}
+  ]
+};
+
+const $ = id => document.getElementById(id);
+const studentSelect = $("student");
+students.forEach(name => {
+  const option = document.createElement("option");
+  option.value = name;
+  option.textContent = name;
+  studentSelect.appendChild(option);
+});
+
+let questions = [];
+let answers = [];
+let index = 0;
+let remaining = 0;
+let interval = null;
+let submitted = false;
+
+function shuffle(items) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function showTime() {
+  const min = Math.floor(remaining / 60);
+  const sec = remaining % 60;
+  $("timer").textContent =
+    String(min).padStart(2,"0") + ":" + String(sec).padStart(2,"0");
+}
+
+function startQuiz() {
+  if (!studentSelect.value) {
+    alert("Please choose your name first.");
+    return;
+  }
+  questions = shuffle(bank[$("subject").value]);
+  answers = Array(questions.length).fill(null);
+  index = 0;
+  submitted = false;
+  $("welcome").style.display = "none";
+  $("results").style.display = "none";
+  $("quiz").style.display = "block";
+  $("quizTitle").textContent =
+    $("subject").value === "math" ? "Math Assessment" : "English Assessment";
+  const mins = Number($("minutes").value);
+  remaining = mins * 60;
+  showTime();
+  if (interval) clearInterval(interval);
+  if (mins > 0) {
+    interval = setInterval(() => {
+      remaining--;
+      showTime();
+      if (remaining <= 0) finishQuiz();
+    }, 1000);
+  } else {
+    $("timer").textContent = "No time limit";
+  }
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[index];
+  $("progress").textContent =
+    `Question ${index + 1} of ${questions.length}`;
+  const form = $("questions");
+  form.replaceChildren();
+
+  const title = document.createElement("p");
+  title.textContent = q.q;
+  const wrapper = document.createElement("div");
+  wrapper.className = "question";
+  wrapper.appendChild(title);
+
+  q.a.forEach((answer, i) => {
+    const label = document.createElement("label");
+    label.className = "option";
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "answer";
+    radio.value = i;
+    radio.checked = answers[index] === i;
+    radio.addEventListener("change", () => {
+      answers[index] = i;
+    });
+    label.append(radio, document.createTextNode(answer));
+    wrapper.appendChild(label);
+  });
+  form.appendChild(wrapper);
+  $("back").disabled = index === 0;
+  $("next").style.display = index === questions.length - 1 ? "none" : "block";
+  $("finish").style.display = index === questions.length - 1 ? "block" : "none";
+}
+
+function finishQuiz() {
+  if (submitted) return;
+  submitted = true;
+  if (interval) clearInterval(interval);
+
+  const correct = questions.reduce(
+    (sum, q, i) => sum + (answers[i] === q.c ? 1 : 0), 0
+  );
+  const percent = Math.round(correct / questions.length * 100);
+  $("quiz").style.display = "none";
+  $("results").style.display = "block";
+  $("score").textContent =
+    `${studentSelect.value}, your score is ${correct}/${questions.length} (${percent}%).`;
+
+  const review = $("review");
+  review.replaceChildren();
+  questions.forEach((q, i) => {
+    const p = document.createElement("p");
+    const chosen = answers[i] === null ? "Not answered" : q.a[answers[i]];
+    p.textContent =
+      `${i + 1}. ${q.q} Your answer: ${chosen}. Correct answer: ${q.a[q.c]}.`;
+    p.style.color = answers[i] === q.c ? "var(--green)" : "var(--red)";
+    review.appendChild(p);
+  });
+}
+
+$("start").addEventListener("click", startQuiz);
+$("back").addEventListener("click", () => {
+  if (index > 0) { index--; renderQuestion(); }
+});
+$("next").addEventListener("click", () => {
+  if (index < questions.length - 1) { index++; renderQuestion(); }
+});
+$("finish").addEventListener("click", finishQuiz);
+$("again").addEventListener("click", () => {
+  $("results").style.display = "none";
+  $("welcome").style.display = "block";
+});
+</script>
+</body>
+</html>
